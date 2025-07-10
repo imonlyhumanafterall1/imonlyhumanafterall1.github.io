@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>YAY</title>
+
+    <!-- Google Font -->
+    <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap"
+            rel="stylesheet"
+    />
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            position: relative;
+            height: 100vh;
+            color: #fff;
+        }
+
+        #gameCanvas {
+            display: block;
+            background: rgba(255,255,255,0.1);
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            z-index: 2;
+        }
+
+        #winBtn {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 0.75rem 1.5rem;
+            background: #fff;
+            color: #e52e71;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 2;
+            transition: transform 0.2s;
+        }
+        #winBtn:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+<div id="score">Hearts caught: 0/10</div>
+<button id="winBtn">im a pro gamer and a big girl</button>
+<canvas id="gameCanvas"></canvas>
+
+<!-- Confetti Library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+<script>
+    // Canvas setup
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Game variables
+    const basket = {
+        width: 100, height: 20,
+        x: canvas.width / 2 - 50,
+        y: canvas.height - 40,
+        speed: 7
+    };
+    const hearts = [];
+    const spawnInterval = 1000; // ms
+    const target = 10;
+    let caught = 0;
+    let animationId, spawnerId;
+    let keys = {};
+
+    // Draw basket
+    function drawBasket() {
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+    }
+
+    // Heart constructor
+    class Heart {
+        constructor() {
+            this.radius = 15;
+            this.x = Math.random() * (canvas.width - 2 * this.radius) + this.radius;
+            this.y = -this.radius;
+            this.speed = 2 + Math.random() * 2;
+        }
+        draw() {
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            // simple heart shape using arc
+            const x = this.x, y = this.y, r = this.radius;
+            ctx.moveTo(x, y);
+            ctx.bezierCurveTo(x, y - r/2, x - r, y - r/2, x - r, y + r/3);
+            ctx.bezierCurveTo(x - r, y + r, x, y + r * 1.5, x, y + r * 1.8);
+            ctx.bezierCurveTo(x, y + r * 1.5, x + r, y + r, x + r, y + r/3);
+            ctx.bezierCurveTo(x + r, y - r/2, x, y - r/2, x, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+        update() {
+            this.y += this.speed;
+        }
+    }
+
+    // Spawn hearts
+    function spawnHearts() {
+        spawnerId = setInterval(() => {
+            hearts.push(new Heart());
+        }, spawnInterval);
+    }
+
+    // Update score display
+    function updateScore() {
+        document.getElementById('score').textContent =
+            `Hearts caught: ${caught}/${target}`;
+    }
+
+    // Game loop
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBasket();
+
+        hearts.forEach((heart, i) => {
+            heart.update();
+            heart.draw();
+
+            // Check catch
+            if (
+                heart.y + heart.radius >= basket.y &&
+                heart.x > basket.x &&
+                heart.x < basket.x + basket.width
+            ) {
+                hearts.splice(i, 1);
+                caught++;
+                updateScore();
+            }
+            // Remove off-screen hearts
+            else if (heart.y - heart.radius > canvas.height) {
+                hearts.splice(i, 1);
+            }
+        });
+
+        // Move basket
+        if (keys['ArrowLeft'] && basket.x > 0) {
+            basket.x -= basket.speed;
+        }
+        if (keys['ArrowRight'] && basket.x + basket.width < canvas.width) {
+            basket.x += basket.speed;
+        }
+
+        // Check win
+        if (caught >= target) {
+            winGame();
+            return;
+        }
+
+        animationId = requestAnimationFrame(animate);
+    }
+
+    // Win condition
+    function winGame() {
+        cancelAnimationFrame(animationId);
+        clearInterval(spawnerId);
+        confetti({ particleCount:200, spread:70, origin:{ x:0.5, y:0.3 } });
+        document.getElementById('winBtn').style.display = 'block';
+    }
+
+    // Input handling
+    window.addEventListener('keydown', e => { keys[e.key] = true; });
+    window.addEventListener('keyup',   e => { keys[e.key] = false; });
+
+    // Proceed button
+    document.getElementById('winBtn')
+        .addEventListener('click', () => {
+            window.location.href = 'greeting.html';
+        });
+
+    // Start game
+    updateScore();
+    spawnHearts();
+    animate();
+</script>
+</body>
+</html>

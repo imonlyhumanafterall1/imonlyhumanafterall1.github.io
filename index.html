@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>hehe</title>
+
+  <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap"
+          rel="stylesheet"
+  />
+
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f499bd;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100vh; text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(5, 80px);
+      grid-gap: 15px;
+      margin-bottom: 1.5rem;
+    }
+
+    .cell {
+      width: 80px; height: 80px;
+      background: #eee;
+      border-radius: 8px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .cell:hover {
+      background: #ddd;
+    }
+
+    .heart {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 30px; height: 30px;
+      background: url('data:image/svg+xml;utf8,\
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red">\
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 \
+        2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09 \
+        C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5 \
+        c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>\
+        </svg>') no-repeat center;
+      background-size: contain;
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform 0.3s ease-out;
+    }
+
+    .found .heart {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    #status {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+    #prompt {
+
+    }
+    #goBtn {
+      display: none;
+      padding: 0.75rem 1.5rem;
+      background: #f197bb;
+      color: #f197bb;
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #goBtn:hover {
+      background: #000000;
+    }
+  </style>
+</head>
+
+<body>
+<h1>FIND 8 HEARTS >:3</h1>
+<div id="grid"></div>
+<div id="status">PROGESS :3 <span id="count">0</span>/8</div>
+<div id="prompt">
+  🎉 After finding all hearts, find the button :3
+</div>
+
+<button id="goBtn">LETSGOOOOOOO</button>
+
+<script>
+  const totalHearts = 8;
+  const grid = document.getElementById('grid');
+  const countEl = document.getElementById('count');
+  const goBtn = document.getElementById('goBtn');
+  let found = 0;
+
+  // Create 25 cells, randomly assign 8 as hearts
+  const heartPositions = new Set();
+  while (heartPositions.size < totalHearts) {
+    heartPositions.add(Math.floor(Math.random() * 25));
+  }
+
+  for (let i = 0; i < 25; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    if (heartPositions.has(i)) {
+      const heart = document.createElement('div');
+      heart.classList.add('heart');
+      cell.appendChild(heart);
+      cell.dataset.heart = 'true';
+    }
+    cell.addEventListener('click', () => {
+      if (cell.dataset.found || !cell.dataset.heart) return;
+      cell.dataset.found = 'true';
+      cell.classList.add('found');
+      found++;
+      countEl.textContent = found;
+      if (found === totalHearts) {
+        goBtn.style.display = 'inline-block';
+      }
+    });
+    grid.appendChild(cell);
+  }
+
+  // Redirect to greeting page
+  goBtn.addEventListener('click', () => {
+    window.location.href = 'scramble.html';
+  });
+</script>
+</body>
+</html>
